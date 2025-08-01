@@ -529,14 +529,14 @@
             shareButton.disabled = true;
 
             try {
-                const canvas = await html2canvas(captureElement, { useCORS: true, logging: false, scale: 2 });
+                // *** MODIFIED CODE: Increased scale from 2 to 3 for higher resolution ***
+                const canvas = await html2canvas(captureElement, { useCORS: true, logging: false, scale: 3 });
                 canvas.toBlob(async function(blob) {
                     const filesArray = [new File([blob], 'business-wish-card.png', { type: 'image/png' })];
-                    // **MODIFIED CODE**
                     const shareData = {
                         files: filesArray,
                         text: `*${userInfo.name}*` + uiText[currentLanguage].shareMessage,
-                        url: window.location.href // Added the page URL to be shared
+                        url: window.location.href
                     };
                     
                     if (navigator.canShare && navigator.canShare(shareData)) {
@@ -547,7 +547,8 @@
                 }, 'image/png');
             } catch (error) {
                 alert(uiText[currentLanguage].shareError);
-                const canvas = await html2canvas(captureElement, { scale: 2 });
+                 // *** MODIFIED CODE: Increased scale from 2 to 3 for higher resolution ***
+                const canvas = await html2canvas(captureElement, { scale: 3 });
                 const link = document.createElement('a');
                 link.download = 'business-wish-card.png';
                 link.href = canvas.toDataURL();
