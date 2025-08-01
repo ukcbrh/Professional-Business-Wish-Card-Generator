@@ -408,6 +408,7 @@
                 shareBtn: "📤 शेयर करें",
                 shareProcessing: "प्रोसेसिंग...",
                 shareMessage: " की ओर से एक प्यारा संदेश! ✨",
+                createYourOwnMessage: "\n\nआप भी अपना आकर्षक बिजनेस कार्ड यहाँ बना सकते हैं:",
                 alertMessage: "कृपया अपना नाम और प्रोफाइल फोटो ज़रूर चुनें!",
                 shareError: "शेयरिंग में त्रुटि हुई। कृपया इमेज डाउनलोड करें और मैन्युअल रूप से शेयर करें।",
                 cropModalTitle: "अपनी फोटो सेट करें",
@@ -434,6 +435,7 @@
                 shareBtn: "📤 Share",
                 shareProcessing: "Processing...",
                 shareMessage: " has sent a lovely message! ✨",
+                createYourOwnMessage: "\n\nYou can also create your attractive business card here:",
                 alertMessage: "Please enter your name and select a profile photo!",
                 shareError: "Error in sharing. Please download the image and share manually.",
                 cropModalTitle: "Set Your Photo",
@@ -667,7 +669,7 @@
                     const filesArray = [new File([blob], 'business-wish-card.png', { type: 'image/png' })];
                     const shareData = {
                         files: filesArray,
-                        text: `*${userInfo.name}*` + uiText[currentLanguage].shareMessage,
+                        text: `*${userInfo.name}*` + uiText[currentLanguage].shareMessage + uiText[currentLanguage].createYourOwnMessage,
                         url: window.location.href
                     };
                     
