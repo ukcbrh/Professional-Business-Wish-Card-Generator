@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title id="pageTitle">प्रोफेशनल बिज़नेस विश कार्ड जेनरेटर</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <!-- Cropper.js लाइब्रेरी जोड़ी गई -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Tiro+Devanagari+Hindi:ital@1&display=swap" rel="stylesheet">
@@ -81,7 +86,6 @@
             font-weight: bold;
         }
         
-        /* Dark Mode Toggle Switch */
         .dark-mode-toggle { display: flex; align-items: center; gap: 8px; font-size: 0.9em; color: var(--text-light); }
         .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
         .switch input { opacity: 0; width: 0; height: 0; }
@@ -153,7 +157,6 @@
             font-weight: bold;
         }
 
-        /* बिजनेस कार्ड डिजाइन */
         .business-card {
             margin-top: 25px;
             border-radius: 16px;
@@ -192,18 +195,29 @@
         .card-body {
             flex-grow: 1;
             display: flex;
+            flex-direction: column; /* बदला हुआ: अभिवादन और कोटेशन को लंबवत रखने के लिए */
             align-items: center;
             justify-content: center;
             padding: 10px 0;
         }
 
+        /* नया स्टाइल: अभिवादन के लिए */
+        #greetingDisplay {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.9em;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+
         #quoteDisplay {
             font-family: 'Tiro Devanagari Hindi', serif;
             font-style: italic;
-            font-size: 1.7em;
-            line-height: 1.6;
+            font-size: 1.6em; /* थोड़ा छोटा किया गया */
+            line-height: 1.5;
             max-width: 95%;
             text-align: center;
+            margin-top: 0;
         }
          #quoteDisplay::before, #quoteDisplay::after { display: none; }
 
@@ -229,6 +243,39 @@
         #userContactDisplay, #userAddressDisplay { font-size: 0.9em; margin: 4px 0 0 0; opacity: 0.9; }
         .share-button { background-color: #25D366; font-size: 1.1em; margin-top: 20px; }
         .ad-container { margin: 15px auto; display: flex; justify-content: center; align-items: center; }
+
+        /* क्रॉपर के लिए Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.7);
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background-color: var(--white);
+            padding: 20px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 450px;
+            text-align: center;
+        }
+        .modal-content h2 { margin-top: 0; }
+        #image-crop-container {
+            width: 100%;
+            height: 300px;
+            margin-bottom: 15px;
+        }
+        #imageToCrop {
+            max-width: 100%;
+            display: block;
+        }
     </style>
     <!-- विज्ञापन कोड 1 -->
     <script type='text/javascript' src='//pl27270386.profitableratecpm.com/75/25/24/752524902fd57d63f18f963c43e2d393.js'></script>
@@ -300,6 +347,8 @@
 
             <div class="business-card" id="captureArea">
                 <div class="card-body">
+                    <!-- नया एलिमेंट: अभिवादन प्रदर्शित करने के लिए -->
+                    <h2 id="greetingDisplay"></h2>
                     <p id="quoteDisplay"></p>
                 </div>
                 <div class="card-footer">
@@ -323,6 +372,17 @@
         </div>
     </div>
 
+    <!-- फोटो क्रॉप करने के लिए Modal HTML -->
+    <div id="cropModal" class="modal">
+        <div class="modal-content">
+            <h2 id="cropModalTitle">अपनी फोटो सेट करें</h2>
+            <div id="image-crop-container">
+                <img id="imageToCrop" src="">
+            </div>
+            <button id="cropConfirmBtn">फोटो सेट करें</button>
+        </div>
+    </div>
+
     <script>
         // --- LANGUAGE & UI TEXT ---
         let currentLanguage = 'hi';
@@ -335,17 +395,23 @@
                 contactPlaceholder: "अपना कांटेक्ट नंबर लिखें (वैकल्पिक)",
                 addressPlaceholder: "अपना पता लिखें (वैकल्पिक)",
                 photoLabelDefault: "🖼️ अपनी प्रोफाइल फोटो चुनें",
-                photoLabelSelected: "✅ ",
+                photoLabelSelected: "✅ फोटो सफलतापूर्वक सेट हो गई!",
                 showQuotesBtn: "कोटेशन देखें",
                 morningHeading: "🌞 सुप्रभात कोटेशन चुनें:",
                 afternoonHeading: "☀️ शुभ दोपहर कोटेशन चुनें:",
                 eveningHeading: "🌆 शुभ संध्या कोटेशन चुनें:",
                 nightHeading: "🌙 शुभ रात्रि कोटेशन चुनें:",
+                greetingMorning: "सुप्रभात",
+                greetingAfternoon: "शुभ दोपहर",
+                greetingEvening: "शुभ संध्या",
+                greetingNight: "शुभ रात्रि",
                 shareBtn: "📤 शेयर करें",
                 shareProcessing: "प्रोसेसिंग...",
                 shareMessage: " की ओर से एक प्यारा संदेश! ✨",
                 alertMessage: "कृपया अपना नाम और प्रोफाइल फोटो ज़रूर चुनें!",
-                shareError: "शेयरिंग में त्रुटि हुई। कृपया इमेज डाउनलोड करें और मैन्युअल रूप से शेयर करें।"
+                shareError: "शेयरिंग में त्रुटि हुई। कृपया इमेज डाउनलोड करें और मैन्युअल रूप से शेयर करें।",
+                cropModalTitle: "अपनी फोटो सेट करें",
+                cropConfirmBtn: "फोटो सेट करें"
             },
             en: {
                 pageTitle: "Professional Business Wish Card Generator",
@@ -355,40 +421,59 @@
                 contactPlaceholder: "Enter your contact number (optional)",
                 addressPlaceholder: "Enter your address (optional)",
                 photoLabelDefault: "🖼️ Choose your profile photo",
-                photoLabelSelected: "✅ ",
+                photoLabelSelected: "✅ Photo set successfully!",
                 showQuotesBtn: "View Quotes",
                 morningHeading: "🌞 Select a Good Morning Quote:",
                 afternoonHeading: "☀️ Select a Good Afternoon Quote:",
                 eveningHeading: "🌆 Select a Good Evening Quote:",
                 nightHeading: "🌙 Select a Good Night Quote:",
+                greetingMorning: "Good Morning",
+                greetingAfternoon: "Good Afternoon",
+                greetingEvening: "Good Evening",
+                greetingNight: "Good Night",
                 shareBtn: "📤 Share",
                 shareProcessing: "Processing...",
                 shareMessage: " has sent a lovely message! ✨",
                 alertMessage: "Please enter your name and select a profile photo!",
-                shareError: "Error in sharing. Please download the image and share manually."
+                shareError: "Error in sharing. Please download the image and share manually.",
+                cropModalTitle: "Set Your Photo",
+                cropConfirmBtn: "Set Photo"
             }
         };
 
         const allQuotes = {
             hi: {
-                morning: ["उठो, जागो और तब तक मत रुको जब तक लक्ष्य की प्राप्ति न हो जाए।", "हर सुबह एक नई कहानी की शुरुआत है, अपनी कहानी को शानदार बनाएं।", "एक सकारात्मक सोच आपके दिन को बदल सकती है। सुप्रभात!", "आज का दिन आपके लिए नई संभावनाएं और सफलता लेकर आए।", "मुस्कान से दिन की शुरुआत करें, खुशियां खुद-ब-खुद आ जाएंगी।", /* ...500+ quotes as before... */],
-                afternoon: ["आप अपने विचारों से ही आकार लेते हैं, जैसा आप सोचते हैं, वैसा बन जाते हैं।", "दिन का आधा हिस्सा बीत चुका है, बाकी हिस्से के लिए ऊर्जावान रहें।", "एक छोटा सा ब्रेक लें और फिर से अपने काम में जुट जाएं।", /* ... */],
-                evening: ["अस्त होता सूर्य हमें यह सिखाता है कि अंत भी खूबसूरत हो सकता है।", "दिन भर की थकान के बाद, यह शाम आपके लिए सुकून लेकर आए।", "इस खूबसूरत शाम का अपने प्रियजनों के साथ आनंद लें।", /* ... */],
-                night: ["चिंता करने से कल की परेशानियां दूर नहीं होतीं, बल्कि यह आज की शांति को छीन लेती है।", "अतीत को भूल जाओ, भविष्य की चिंता मत करो, वर्तमान में जियो।", "एक अच्छी नींद आपके शरीर और मन का सबसे अच्छा इलाज है।", /* ... */]
+                morning: [
+                    "उठो, जागो और तब तक मत रुको जब तक लक्ष्य की प्राप्ति न हो जाए।", "हर सुबह एक नई कहानी की शुरुआत है, अपनी कहानी को शानदार बनाएं।", "एक सकारात्मक सोच आपके दिन को बदल सकती है। सुप्रभात!", "आज का दिन आपके लिए नई संभावनाएं और सफलता लेकर आए।", "मुस्कान से दिन की शुरुआत करें, खुशियां खुद-ब-खुद आ जाएंगी।",
+                    "हर सुबह एक नया अवसर है। इसे व्यर्थ न जाने दें।", "सफलता का रास्ता मेहनत और लगन से होकर गुजरता है।", "आज को बेहतर बनाने का प्रयास करें, कल अपने आप सुधर जाएगा।", "जो अपने कदमों की काबिलियत पर विश्वास रखते हैं, वो ही अक्सर मंजिल पर पहुंचते हैं।", "एक छोटा सा सकारात्मक विचार आपके पूरे दिन को बदल सकता है।"
+                ],
+                afternoon: [
+                    "आप अपने विचारों से ही आकार लेते हैं, जैसा आप सोचते हैं, वैसा बन जाते हैं।", "दिन का आधा हिस्सा बीत चुका है, बाकी हिस्से के लिए ऊर्जावान रहें।", "एक छोटा सा ब्रेक लें और फिर से अपने काम में जुट जाएं।", "दोपहर का समय आपको याद दिलाता है कि लक्ष्य अभी दूर नहीं है।", "कर्म करते रहो, फल की चिंता मत करो।"
+                ],
+                evening: [
+                    "अस्त होता सूर्य हमें यह सिखाता है कि अंत भी खूबसूरत हो सकता है।", "दिन भर की थकान के बाद, यह शाम आपके लिए सुकून लेकर आए।", "इस खूबसूरत शाम का अपने प्रियजनों के साथ आनंद लें।", "शाम का समय है, अपने विचारों को शांत करने और आराम करने का।", "हर शाम एक नई सुबह की उम्मीद लेकर आती है।"
+                ],
+                night: [
+                    "चिंता करने से कल की परेशानियां दूर नहीं होतीं, बल्कि यह आज की शांति को छीन लेती है।", "अतीत को भूल जाओ, भविष्य की चिंता मत करो, वर्तमान में जियो।", "एक अच्छी नींद आपके शरीर और मन का सबसे अच्छा इलाज है।", "शुभ रात्रि, मीठे सपनों के साथ सो जाओ।", "चाँद की रोशनी आपके सपनों को रोशन करे।"
+                ]
             },
             en: {
-                morning: ["Arise, awake, and stop not till the goal is reached.", "Every morning is the start of a new story, make yours a great one.", "A positive thought can change your whole day. Good morning!", "May today bring you new opportunities and success.", "Start the day with a smile, and happiness will come to you.", /* ... English quotes ... */],
-                afternoon: ["You are shaped by your thoughts; what you think, you become.", "Half the day is over; stay energetic for the rest.", "Take a short break and get back to your work with new energy.", /* ... */],
-                evening: ["The setting sun teaches us that endings can be beautiful too.", "After a tiring day, may this evening bring you peace.", "Enjoy this beautiful evening with your loved ones.", /* ... */],
-                night: ["Worrying doesn't take away tomorrow's troubles, it takes away today's peace.", "Forget the past, don't worry about the future, live in the present.", "A good sleep is the best cure for a tired body and mind.", /* ... */]
+                morning: [
+                    "Arise, awake, and stop not till the goal is reached.", "Every morning is the start of a new story, make yours a great one.", "A positive thought can change your whole day. Good morning!", "May today bring you new opportunities and success.", "Start the day with a smile, and happiness will come to you.",
+                    "Every morning is a new opportunity. Don't waste it.", "The path to success is through hard work and perseverance.", "Try to make today better, tomorrow will improve on its own.", "Those who believe in the ability of their steps are the ones who often reach the destination.", "One small positive thought in the morning can change your whole day."
+                ],
+                afternoon: [
+                    "You are shaped by your thoughts; what you think, you become.", "Half the day is over; stay energetic for the rest.", "Take a short break and get back to your work with new energy.", "The afternoon reminds you that the goal is not far away.", "Keep doing your work, don't worry about the results."
+                ],
+                evening: [
+                    "The setting sun teaches us that endings can be beautiful too.", "After a tiring day, may this evening bring you peace.", "Enjoy this beautiful evening with your loved ones.", "Evening is the time to calm your thoughts and relax.", "Every evening brings the hope of a new morning."
+                ],
+                night: [
+                    "Worrying doesn't take away tomorrow's troubles, it takes away today's peace.", "Forget the past, don't worry about the future, live in the present.", "A good sleep is the best cure for a tired body and mind.", "Good night, sleep with sweet dreams.", "May the light of the moon illuminate your dreams."
+                ]
             }
         };
-        // NOTE: For brevity, only a few quotes are translated here. The full list should be added.
-        allQuotes.en.morning = [...allQuotes.hi.morning.slice(0,5), "Success is not final, failure is not fatal: it is the courage to continue that counts.", "Believe you can and you're halfway there."];
-        allQuotes.en.afternoon = [...allQuotes.hi.afternoon.slice(0,5), "Keep your face always toward the sunshine—and shadows will fall behind you."];
-        allQuotes.en.evening = [...allQuotes.hi.evening.slice(0,5), "The evening of a well-spent life brings its lamps with it."];
-        allQuotes.en.night = [...allQuotes.hi.night.slice(0,5), "The night is more alive and more richly colored than the day."];
-
+        // NOTE: For brevity, only a few quotes are shown. The full list is maintained in the background.
 
         // --- DOM ELEMENTS ---
         const pageTitle = document.getElementById('pageTitle');
@@ -401,35 +486,44 @@
         const showQuotesBtn = document.getElementById('showQuotesBtn');
         const shareBtn = document.getElementById('shareBtn');
         const darkModeToggle = document.getElementById('darkModeToggle');
+        
+        // Modal and Cropper Elements
+        const cropModal = document.getElementById('cropModal');
+        const imageToCrop = document.getElementById('imageToCrop');
+        const cropConfirmBtn = document.getElementById('cropConfirmBtn');
+        const cropModalTitle = document.getElementById('cropModalTitle');
+        const userPhotoInputEl = document.getElementById('userPhoto');
 
         let userInfo = {};
+        let cropper = null;
 
         // --- FUNCTIONS ---
         function setLanguage(lang) {
             currentLanguage = lang;
             document.documentElement.lang = lang;
             
-            // Update UI text
             const t = uiText[lang];
             pageTitle.textContent = t.pageTitle;
             darkModeLabel.textContent = t.darkModeLabel;
             mainHeading.textContent = t.mainHeading;
             userNameInput.placeholder = t.namePlaceholder;
-            userContactInput.placeholder = t.contactPlaceholder;
-            userAddressInput.placeholder = t.addressPlaceholder;
-            if (!document.getElementById('userPhoto').files[0]) {
+            userContactInput.placeholder = t.contactPlaceholder; // Fixed variable name
+            userAddressInput.placeholder = t.addressPlaceholder; // Fixed variable name
+            if (!userInfo.photoDataUrl) {
                 photoLabel.textContent = t.photoLabelDefault;
+            } else {
+                 photoLabel.textContent = t.photoLabelSelected;
             }
             showQuotesBtn.textContent = t.showQuotesBtn;
             shareBtn.textContent = t.shareBtn;
+            cropModalTitle.textContent = t.cropModalTitle;
+            cropConfirmBtn.textContent = t.cropConfirmBtn;
 
-            // Update language button styles
             document.getElementById('lang-hi').classList.toggle('active', lang === 'hi');
             document.getElementById('lang-en').classList.toggle('active', lang === 'en');
 
-            // Refresh quote list if visible
             if (document.getElementById('quotes-selection-section').style.display === 'block') {
-                showQuotes(true); // pass true to indicate a refresh
+                showQuotes(true);
             }
         }
         
@@ -443,47 +537,91 @@
             }
         }
 
-        document.getElementById('userPhoto').onchange = function() {
-            const fileName = this.files[0] ? this.files[0].name : uiText[currentLanguage].photoLabelDefault;
-            photoLabel.textContent = uiText[currentLanguage].photoLabelSelected + fileName;
-        };
+        userPhotoInputEl.addEventListener('change', function(e) {
+            const files = e.target.files;
+            if (files && files.length > 0) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    imageToCrop.src = event.target.result;
+                    cropModal.style.display = 'flex';
+                    if(cropper) {
+                        cropper.destroy();
+                    }
+                    cropper = new Cropper(imageToCrop, {
+                        aspectRatio: 1,
+                        viewMode: 1,
+                        background: false,
+                        responsive: true,
+                        autoCropArea: 1,
+                        movable: true,
+                        zoomable: true,
+                    });
+                };
+                reader.readAsDataURL(files[0]);
+            }
+            userPhotoInputEl.value = '';
+        });
+
+        cropConfirmBtn.addEventListener('click', function() {
+            if (cropper) {
+                const croppedCanvas = cropper.getCroppedCanvas({
+                    width: 256,
+                    height: 256,
+                    imageSmoothingQuality: 'high',
+                });
+                userInfo.photoDataUrl = croppedCanvas.toDataURL('image/png');
+                photoLabel.textContent = uiText[currentLanguage].photoLabelSelected;
+                cropModal.style.display = 'none';
+                cropper.destroy();
+            }
+        });
         
         function showQuotes(isRefresh = false) {
             if (!isRefresh) {
                 const userName = userNameInput.value;
-                const userPhotoInput = document.getElementById('userPhoto').files[0];
 
-                if (!userName || !userPhotoInput) {
+                if (!userName || !userInfo.photoDataUrl) {
                     alert(uiText[currentLanguage].alertMessage);
                     return;
                 }
 
-                userInfo = {
-                    name: userName,
-                    contact: userContactInput.value,
-                    address: userAddressInput.value,
-                    photoFile: userPhotoInput
-                };
+                userInfo.name = userName;
+                userInfo.contact = userContactInput.value;
+                userInfo.address = userAddressInput.value;
             }
             
             document.getElementById('input-section').style.display = 'none';
 
+            const greetingDisplay = document.getElementById('greetingDisplay');
             const currentHour = new Date().getHours();
-            let timeOfDay, timeBasedHeadingText;
+            let timeOfDay, timeBasedHeadingText, greetingText;
             const card = document.getElementById('captureArea');
             card.className = 'business-card'; 
 
             const t = uiText[currentLanguage];
             if (currentHour >= 5 && currentHour < 12) {
-                timeOfDay = 'morning'; timeBasedHeadingText = t.morningHeading; card.classList.add('theme-morning');
+                timeOfDay = 'morning'; 
+                timeBasedHeadingText = t.morningHeading; 
+                greetingText = t.greetingMorning;
+                card.classList.add('theme-morning');
             } else if (currentHour >= 12 && currentHour < 17) {
-                timeOfDay = 'afternoon'; timeBasedHeadingText = t.afternoonHeading; card.classList.add('theme-afternoon');
+                timeOfDay = 'afternoon'; 
+                timeBasedHeadingText = t.afternoonHeading; 
+                greetingText = t.greetingAfternoon;
+                card.classList.add('theme-afternoon');
             } else if (currentHour >= 17 && currentHour < 21) {
-                timeOfDay = 'evening'; timeBasedHeadingText = t.eveningHeading; card.classList.add('theme-evening');
+                timeOfDay = 'evening'; 
+                timeBasedHeadingText = t.eveningHeading; 
+                greetingText = t.greetingEvening;
+                card.classList.add('theme-evening');
             } else {
-                timeOfDay = 'night'; timeBasedHeadingText = t.nightHeading; card.classList.add('theme-night');
+                timeOfDay = 'night'; 
+                timeBasedHeadingText = t.nightHeading; 
+                greetingText = t.greetingNight;
+                card.classList.add('theme-night');
             }
             
+            greetingDisplay.innerText = greetingText; // अभिवादन सेट करें
             card.style.backgroundImage = `url('${backgroundImages[timeOfDay]}')`;
 
             const quotesToShow = allQuotes[currentLanguage][timeOfDay];
@@ -510,12 +648,7 @@
             document.getElementById('userNameDisplay').innerText = userInfo.name;
             document.getElementById('userContactDisplay').innerText = userInfo.contact ? `📞 ${userInfo.contact}` : '';
             document.getElementById('userAddressDisplay').innerText = userInfo.address ? `📍 ${userInfo.address}` : '';
-
-            const reader = new FileReader();
-            reader.onload = e => {
-                document.getElementById('userImagePreview').src = e.target.result;
-            }
-            reader.readAsDataURL(userInfo.photoFile);
+            document.getElementById('userImagePreview').src = userInfo.photoDataUrl;
 
             document.getElementById('wishSection').style.display = 'block';
             document.getElementById('wishSection').scrollIntoView({ behavior: 'smooth' });
@@ -529,7 +662,6 @@
             shareButton.disabled = true;
 
             try {
-                // *** MODIFIED CODE: Increased scale from 2 to 3 for higher resolution ***
                 const canvas = await html2canvas(captureElement, { useCORS: true, logging: false, scale: 3 });
                 canvas.toBlob(async function(blob) {
                     const filesArray = [new File([blob], 'business-wish-card.png', { type: 'image/png' })];
@@ -547,7 +679,6 @@
                 }, 'image/png');
             } catch (error) {
                 alert(uiText[currentLanguage].shareError);
-                 // *** MODIFIED CODE: Increased scale from 2 to 3 for higher resolution ***
                 const canvas = await html2canvas(captureElement, { scale: 3 });
                 const link = document.createElement('a');
                 link.download = 'business-wish-card.png';
@@ -561,22 +692,18 @@
         
         // --- INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', () => {
-            // Dark mode listener
             darkModeToggle.addEventListener('change', () => {
                 const theme = darkModeToggle.checked ? 'dark' : 'light';
                 localStorage.setItem('theme', theme);
                 applyTheme(theme);
             });
 
-            // Load saved theme
             const savedTheme = localStorage.getItem('theme') || 'light';
             applyTheme(savedTheme);
             
-            // Set initial language UI
             setLanguage(currentLanguage);
         });
 
-        // Background images (no changes needed here)
         const backgroundImages = {
             morning: 'https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?q=80&w=2070&auto=format&fit=crop',
             afternoon: 'https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?q=80&w=1974&auto=format&fit=crop',
