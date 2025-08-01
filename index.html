@@ -532,9 +532,11 @@
                 const canvas = await html2canvas(captureElement, { useCORS: true, logging: false, scale: 2 });
                 canvas.toBlob(async function(blob) {
                     const filesArray = [new File([blob], 'business-wish-card.png', { type: 'image/png' })];
+                    // **MODIFIED CODE**
                     const shareData = {
                         files: filesArray,
                         text: `*${userInfo.name}*` + uiText[currentLanguage].shareMessage,
+                        url: window.location.href // Added the page URL to be shared
                     };
                     
                     if (navigator.canShare && navigator.canShare(shareData)) {
