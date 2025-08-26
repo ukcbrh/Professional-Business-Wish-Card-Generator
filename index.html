@@ -195,13 +195,12 @@
         .card-body {
             flex-grow: 1;
             display: flex;
-            flex-direction: column; /* बदला हुआ: अभिवादन और कोटेशन को लंबवत रखने के लिए */
+            flex-direction: column; 
             align-items: center;
             justify-content: center;
             padding: 10px 0;
         }
 
-        /* नया स्टाइल: अभिवादन के लिए */
         #greetingDisplay {
             font-family: 'Poppins', sans-serif;
             font-size: 1.9em;
@@ -213,7 +212,7 @@
         #quoteDisplay {
             font-family: 'Tiro Devanagari Hindi', serif;
             font-style: italic;
-            font-size: 1.6em; /* थोड़ा छोटा किया गया */
+            font-size: 1.6em;
             line-height: 1.5;
             max-width: 95%;
             text-align: center;
@@ -243,7 +242,6 @@
         #userContactDisplay, #userAddressDisplay { font-size: 0.9em; margin: 4px 0 0 0; opacity: 0.9; }
         .share-button { background-color: #25D366; font-size: 1.1em; margin-top: 20px; }
         
-        /* क्रॉपर के लिए Modal Styles */
         .modal {
             display: none;
             position: fixed;
@@ -275,6 +273,23 @@
             max-width: 100%;
             display: block;
         }
+
+        /* मोबाइल व्यू के लिए सुधार */
+        @media (max-width: 420px) {
+            .business-card {
+                padding: 15px;
+            }
+            #greetingDisplay { font-size: 1.7em; }
+            #quoteDisplay { font-size: 1.4em; }
+            #userImagePreview { width: 65px; height: 65px; }
+            #userNameDisplay { font-size: 1.4em; }
+            #userContactDisplay, #userAddressDisplay { 
+                font-size: 0.85em; 
+                word-break: break-all; /* लम्बे टेक्स्ट को टूटने में मदद करता है */
+            }
+            .card-footer { gap: 12px; }
+        }
+
     </style>
     <!-- विज्ञापन कोड 1 -->
     <script type='text/javascript' src='//pl27270386.profitableratecpm.com/75/25/24/752524902fd57d63f18f963c43e2d393.js'></script>
@@ -299,14 +314,19 @@
         
         <!-- चरण 1: उपयोगकर्ता जानकारी फॉर्म -->
         <div id="input-section">
-            <h1 id="mainHeading">अपना बिजनेस कार्ड बनाएं</h1>
+            <h1 id="mainHeading">अपना कार्ड बनाए </h1>
             <div class="input-form">
                 <input type="text" id="userName" placeholder="अपना पूरा नाम लिखें">
                 <input type="tel" id="userContact" placeholder="अपना कांटेक्ट नंबर लिखें (वैकल्पिक)">
                 <input type="text" id="userAddress" placeholder="अपना पता लिखें (वैकल्पिक)">
+                
                 <label for="userPhoto" id="photoLabel">🖼️ अपनी प्रोफाइल फोटो चुनें</label>
                 <input type="file" id="userPhoto" accept="image/*">
                 
+                <!-- नया: बैकग्राउंड चुनने का विकल्प -->
+                <label for="userBackground" id="backgroundLabel">🖼️ अपना बैकग्राउंड चुनें</label>
+                <input type="file" id="userBackground" accept="image/*">
+
                 <button id="showQuotesBtn" onclick="showQuotes()">कोटेशन देखें</button>
             </div>
         </div>
@@ -322,7 +342,6 @@
 
             <div class="business-card" id="captureArea">
                 <div class="card-body">
-                    <!-- नया एलिमेंट: अभिवादन प्रदर्शित करने के लिए -->
                     <h2 id="greetingDisplay"></h2>
                     <p id="quoteDisplay"></p>
                 </div>
@@ -347,7 +366,7 @@
             <div id="image-crop-container">
                 <img id="imageToCrop" src="">
             </div>
-            <button id="cropConfirmBtn">फोटो सेट करें</button>
+            <button id="cropConfirmBtn">सेट करें</button>
         </div>
     </div>
 
@@ -358,12 +377,14 @@
             hi: {
                 pageTitle: "प्रोफेशनल बिज़नेस विश कार्ड जेनरेटर",
                 darkModeLabel: "डार्क मोड",
-                mainHeading: "अपना बिजनेस कार्ड बनाएं",
+                mainHeading: "अपना कार्ड बनाए ",
                 namePlaceholder: "अपना पूरा नाम लिखें",
                 contactPlaceholder: "अपना कांटेक्ट नंबर लिखें (वैकल्पिक)",
                 addressPlaceholder: "अपना पता लिखें (वैकल्पिक)",
                 photoLabelDefault: "🖼️ अपनी प्रोफाइल फोटो चुनें",
-                photoLabelSelected: "✅ फोटो सफलतापूर्वक सेट हो गई!",
+                photoLabelSelected: "✅ प्रोफाइल फोटो सेट हो गई!",
+                backgroundLabelDefault: "🖼️ अपना बैकग्राउंड चुनें",
+                backgroundLabelSelected: "✅ बैकग्राउंड सफलतापूर्वक सेट हो गया!",
                 showQuotesBtn: "कोटेशन देखें",
                 morningHeading: "🌞 सुप्रभात कोटेशन चुनें:",
                 afternoonHeading: "☀️ शुभ दोपहर कोटेशन चुनें:",
@@ -379,18 +400,21 @@
                 createYourOwnMessage: "\n\nआप भी ऐसे ही अपना बिजनेस कार्ड बना सकते हैं और अपने मित्रों को भेज सकते हैं। यहाँ बनाएँ:",
                 alertMessage: "कृपया अपना नाम और प्रोफाइल फोटो ज़रूर चुनें!",
                 shareError: "शेयरिंग में त्रुटि हुई। कृपया इमेज डाउनलोड करें और मैन्युअल रूप से शेयर करें।",
-                cropModalTitle: "अपनी फोटो सेट करें",
-                cropConfirmBtn: "फोटो सेट करें"
+                cropModalTitlePhoto: "अपनी फोटो सेट करें",
+                cropModalTitleBackground: "अपना बैकग्राउंड सेट करें",
+                cropConfirmBtn: "सेट करें"
             },
             en: {
                 pageTitle: "Professional Business Wish Card Generator",
                 darkModeLabel: "Dark Mode",
-                mainHeading: "Create Your Business Card",
+                mainHeading: "Create Your Card",
                 namePlaceholder: "Enter your full name",
                 contactPlaceholder: "Enter your contact number (optional)",
                 addressPlaceholder: "Enter your address (optional)",
                 photoLabelDefault: "🖼️ Choose your profile photo",
-                photoLabelSelected: "✅ Photo set successfully!",
+                photoLabelSelected: "✅ Profile photo set successfully!",
+                backgroundLabelDefault: "🖼️ Choose your background",
+                backgroundLabelSelected: "✅ Background set successfully!",
                 showQuotesBtn: "View Quotes",
                 morningHeading: "🌞 Select a Good Morning Quote:",
                 afternoonHeading: "☀️ Select a Good Afternoon Quote:",
@@ -406,45 +430,27 @@
                 createYourOwnMessage: "\n\nYou can create your own business card and send it to your friends too. Create one here:",
                 alertMessage: "Please enter your name and select a profile photo!",
                 shareError: "Error in sharing. Please download the image and share manually.",
-                cropModalTitle: "Set Your Photo",
-                cropConfirmBtn: "Set Photo"
+                cropModalTitlePhoto: "Set Your Photo",
+                cropModalTitleBackground: "Set Your Background",
+                cropConfirmBtn: "Set"
             }
         };
 
         const allQuotes = {
             hi: {
-                morning: [
-                    "उठो, जागो और तब तक मत रुको जब तक लक्ष्य की प्राप्ति न हो जाए।", "हर सुबह एक नई कहानी की शुरुआत है, अपनी कहानी को शानदार बनाएं।", "एक सकारात्मक सोच आपके दिन को बदल सकती है। सुप्रभात!", "आज का दिन आपके लिए नई संभावनाएं और सफलता लेकर आए।", "मुस्कान से दिन की शुरुआत करें, खुशियां खुद-ब-खुद आ जाएंगी।",
-                    "हर सुबह एक नया अवसर है। इसे व्यर्थ न जाने दें।", "सफलता का रास्ता मेहनत और लगन से होकर गुजरता है।", "आज को बेहतर बनाने का प्रयास करें, कल अपने आप सुधर जाएगा।", "जो अपने कदमों की काबिलियत पर विश्वास रखते हैं, वो ही अक्सर मंजिल पर पहुंचते हैं।", "एक छोटा सा सकारात्मक विचार आपके पूरे दिन को बदल सकता है।"
-                ],
-                afternoon: [
-                    "आप अपने विचारों से ही आकार लेते हैं, जैसा आप सोचते हैं, वैसा बन जाते हैं।", "दिन का आधा हिस्सा बीत चुका है, बाकी हिस्से के लिए ऊर्जावान रहें।", "एक छोटा सा ब्रेक लें और फिर से अपने काम में जुट जाएं।", "दोपहर का समय आपको याद दिलाता है कि लक्ष्य अभी दूर नहीं है।", "कर्म करते रहो, फल की चिंता मत करो।"
-                ],
-                evening: [
-                    "अस्त होता सूर्य हमें यह सिखाता है कि अंत भी खूबसूरत हो सकता है।", "दिन भर की थकान के बाद, यह शाम आपके लिए सुकून लेकर आए।", "इस खूबसूरत शाम का अपने प्रियजनों के साथ आनंद लें।", "शाम का समय है, अपने विचारों को शांत करने और आराम करने का।", "हर शाम एक नई सुबह की उम्मीद लेकर आती है।"
-                ],
-                night: [
-                    "चिंता करने से कल की परेशानियां दूर नहीं होतीं, बल्कि यह आज की शांति को छीन लेती है।", "अतीत को भूल जाओ, भविष्य की चिंता मत करो, वर्तमान में जियो।", "एक अच्छी नींद आपके शरीर और मन का सबसे अच्छा इलाज है।", "शुभ रात्रि, मीठे सपनों के साथ सो जाओ।", "चाँद की रोशनी आपके सपनों को रोशन करे।"
-                ]
+                morning: ["उठो, जागो और तब तक मत रुको जब तक लक्ष्य की प्राप्ति न हो जाए।", "हर सुबह एक नई कहानी की शुरुआत है, अपनी कहानी को शानदार बनाएं।", "एक सकारात्मक सोच आपके दिन को बदल सकती है। सुप्रभात!", "आज का दिन आपके लिए नई संभावनाएं और सफलता लेकर आए।", "मुस्कान से दिन की शुरुआत करें, खुशियां खुद-ब-खुद आ जाएंगी।"],
+                afternoon: ["आप अपने विचारों से ही आकार लेते हैं, जैसा आप सोचते हैं, वैसा बन जाते हैं।", "दिन का आधा हिस्सा बीत चुका है, बाकी हिस्से के लिए ऊर्जावान रहें।", "एक छोटा सा ब्रेक लें और फिर से अपने काम में जुट जाएं।", "दोपहर का समय आपको याद दिलाता है कि लक्ष्य अभी दूर नहीं है।", "कर्म करते रहो, फल की चिंता मत करो।"],
+                evening: ["अस्त होता सूर्य हमें यह सिखाता है कि अंत भी खूबसूरत हो सकता है।", "दिन भर की थकान के बाद, यह शाम आपके लिए सुकून लेकर आए।", "इस खूबसूरत शाम का अपने प्रियजनों के साथ आनंद लें।", "शाम का समय है, अपने विचारों को शांत करने और आराम करने का।", "हर शाम एक नई सुबह की उम्मीद लेकर आती है।"],
+                night: ["चिंता करने से कल की परेशानियां दूर नहीं होतीं, बल्कि यह आज की शांति को छीन लेती है।", "अतीत को भूल जाओ, भविष्य की चिंता मत करो, वर्तमान में जियो।", "एक अच्छी नींद आपके शरीर और मन का सबसे अच्छा इलाज है।", "शुभ रात्रि, मीठे सपनों के साथ सो जाओ।", "चाँद की रोशनी आपके सपनों को रोशन करे।"]
             },
             en: {
-                morning: [
-                    "Arise, awake, and stop not till the goal is reached.", "Every morning is the start of a new story, make yours a great one.", "A positive thought can change your whole day. Good morning!", "May today bring you new opportunities and success.", "Start the day with a smile, and happiness will come to you.",
-                    "Every morning is a new opportunity. Don't waste it.", "The path to success is through hard work and perseverance.", "Try to make today better, tomorrow will improve on its own.", "Those who believe in the ability of their steps are the ones who often reach the destination.", "One small positive thought in the morning can change your whole day."
-                ],
-                afternoon: [
-                    "You are shaped by your thoughts; what you think, you become.", "Half the day is over; stay energetic for the rest.", "Take a short break and get back to your work with new energy.", "The afternoon reminds you that the goal is not far away.", "Keep doing your work, don't worry about the results."
-                ],
-                evening: [
-                    "The setting sun teaches us that endings can be beautiful too.", "After a tiring day, may this evening bring you peace.", "Enjoy this beautiful evening with your loved ones.", "Evening is the time to calm your thoughts and relax.", "Every evening brings the hope of a new morning."
-                ],
-                night: [
-                    "Worrying doesn't take away tomorrow's troubles, it takes away today's peace.", "Forget the past, don't worry about the future, live in the present.", "A good sleep is the best cure for a tired body and mind.", "Good night, sleep with sweet dreams.", "May the light of the moon illuminate your dreams."
-                ]
+                morning: ["Arise, awake, and stop not till the goal is reached.", "Every morning is the start of a new story, make yours a great one.", "A positive thought can change your whole day. Good morning!", "May today bring you new opportunities and success.", "Start the day with a smile, and happiness will come to you."],
+                afternoon: ["You are shaped by your thoughts; what you think, you become.", "Half the day is over; stay energetic for the rest.", "Take a short break and get back to your work with new energy.", "The afternoon reminds you that the goal is not far away.", "Keep doing your work, don't worry about the results."],
+                evening: ["The setting sun teaches us that endings can be beautiful too.", "After a tiring day, may this evening bring you peace.", "Enjoy this beautiful evening with your loved ones.", "Evening is the time to calm your thoughts and relax.", "Every evening brings the hope of a new morning."],
+                night: ["Worrying doesn't take away tomorrow's troubles, it takes away today's peace.", "Forget the past, don't worry about the future, live in the present.", "A good sleep is the best cure for a tired body and mind.", "Good night, sleep with sweet dreams.", "May the light of the moon illuminate your dreams."]
             }
         };
-        // NOTE: For brevity, only a few quotes are shown. The full list is maintained in the background.
-
+        
         // --- DOM ELEMENTS ---
         const pageTitle = document.getElementById('pageTitle');
         const darkModeLabel = document.getElementById('darkModeLabel');
@@ -453,19 +459,21 @@
         const userContactInput = document.getElementById('userContact');
         const userAddressInput = document.getElementById('userAddress');
         const photoLabel = document.getElementById('photoLabel');
+        const backgroundLabel = document.getElementById('backgroundLabel');
         const showQuotesBtn = document.getElementById('showQuotesBtn');
         const shareBtn = document.getElementById('shareBtn');
         const darkModeToggle = document.getElementById('darkModeToggle');
         
-        // Modal and Cropper Elements
         const cropModal = document.getElementById('cropModal');
         const imageToCrop = document.getElementById('imageToCrop');
         const cropConfirmBtn = document.getElementById('cropConfirmBtn');
         const cropModalTitle = document.getElementById('cropModalTitle');
         const userPhotoInputEl = document.getElementById('userPhoto');
+        const userBackgroundInputEl = document.getElementById('userBackground');
 
         let userInfo = {};
         let cropper = null;
+        let currentCropType = null; // 'photo' or 'background'
 
         // --- FUNCTIONS ---
         function setLanguage(lang) {
@@ -477,16 +485,12 @@
             darkModeLabel.textContent = t.darkModeLabel;
             mainHeading.textContent = t.mainHeading;
             userNameInput.placeholder = t.namePlaceholder;
-            userContactInput.placeholder = t.contactPlaceholder; // Fixed variable name
-            userAddressInput.placeholder = t.addressPlaceholder; // Fixed variable name
-            if (!userInfo.photoDataUrl) {
-                photoLabel.textContent = t.photoLabelDefault;
-            } else {
-                 photoLabel.textContent = t.photoLabelSelected;
-            }
+            userContactInput.placeholder = t.contactPlaceholder;
+            userAddressInput.placeholder = t.addressPlaceholder;
+            photoLabel.textContent = userInfo.photoDataUrl ? t.photoLabelSelected : t.photoLabelDefault;
+            backgroundLabel.textContent = userInfo.backgroundDataUrl ? t.backgroundLabelSelected : t.backgroundLabelDefault;
             showQuotesBtn.textContent = t.showQuotesBtn;
             shareBtn.textContent = t.shareBtn;
-            cropModalTitle.textContent = t.cropModalTitle;
             cropConfirmBtn.textContent = t.cropConfirmBtn;
 
             document.getElementById('lang-hi').classList.toggle('active', lang === 'hi');
@@ -498,49 +502,60 @@
         }
         
         function applyTheme(theme) {
-            if (theme === 'dark') {
-                document.body.classList.add('dark-mode');
-                darkModeToggle.checked = true;
-            } else {
-                document.body.classList.remove('dark-mode');
-                darkModeToggle.checked = false;
-            }
+            document.body.classList.toggle('dark-mode', theme === 'dark');
+            darkModeToggle.checked = (theme === 'dark');
         }
 
-        userPhotoInputEl.addEventListener('change', function(e) {
+        function handleFileSelect(e, cropType) {
+            currentCropType = cropType;
             const files = e.target.files;
             if (files && files.length > 0) {
                 const reader = new FileReader();
                 reader.onload = function(event) {
                     imageToCrop.src = event.target.result;
-                    cropModal.style.display = 'flex';
-                    if(cropper) {
-                        cropper.destroy();
+                    
+                    const cropperOptions = {
+                        viewMode: 1, background: false, responsive: true,
+                        autoCropArea: 1, movable: true, zoomable: true,
+                    };
+
+                    if (cropType === 'photo') {
+                        cropperOptions.aspectRatio = 1;
+                        cropModalTitle.textContent = uiText[currentLanguage].cropModalTitlePhoto;
+                    } else { // background
+                        cropperOptions.aspectRatio = 500 / 350; // Card's approximate aspect ratio
+                        cropModalTitle.textContent = uiText[currentLanguage].cropModalTitleBackground;
                     }
-                    cropper = new Cropper(imageToCrop, {
-                        aspectRatio: 1,
-                        viewMode: 1,
-                        background: false,
-                        responsive: true,
-                        autoCropArea: 1,
-                        movable: true,
-                        zoomable: true,
-                    });
+
+                    cropModal.style.display = 'flex';
+                    if(cropper) cropper.destroy();
+                    cropper = new Cropper(imageToCrop, cropperOptions);
                 };
                 reader.readAsDataURL(files[0]);
             }
-            userPhotoInputEl.value = '';
-        });
+            e.target.value = '';
+        }
+
+        userPhotoInputEl.addEventListener('change', (e) => handleFileSelect(e, 'photo'));
+        userBackgroundInputEl.addEventListener('change', (e) => handleFileSelect(e, 'background'));
 
         cropConfirmBtn.addEventListener('click', function() {
             if (cropper) {
-                const croppedCanvas = cropper.getCroppedCanvas({
-                    width: 256,
-                    height: 256,
-                    imageSmoothingQuality: 'high',
-                });
-                userInfo.photoDataUrl = croppedCanvas.toDataURL('image/png');
-                photoLabel.textContent = uiText[currentLanguage].photoLabelSelected;
+                const canvasOptions = { imageSmoothingQuality: 'high' };
+                if(currentCropType === 'photo') {
+                    canvasOptions.width = 256;
+                    canvasOptions.height = 256;
+                }
+                const croppedCanvas = cropper.getCroppedCanvas(canvasOptions);
+                
+                if (currentCropType === 'photo') {
+                    userInfo.photoDataUrl = croppedCanvas.toDataURL('image/png');
+                    photoLabel.textContent = uiText[currentLanguage].photoLabelSelected;
+                } else if (currentCropType === 'background') {
+                    userInfo.backgroundDataUrl = croppedCanvas.toDataURL('image/jpeg', 0.9);
+                    backgroundLabel.textContent = uiText[currentLanguage].backgroundLabelSelected;
+                }
+
                 cropModal.style.display = 'none';
                 cropper.destroy();
             }
@@ -549,12 +564,10 @@
         function showQuotes(isRefresh = false) {
             if (!isRefresh) {
                 const userName = userNameInput.value;
-
                 if (!userName || !userInfo.photoDataUrl) {
                     alert(uiText[currentLanguage].alertMessage);
                     return;
                 }
-
                 userInfo.name = userName;
                 userInfo.contact = userContactInput.value;
                 userInfo.address = userAddressInput.value;
@@ -569,36 +582,28 @@
             card.className = 'business-card'; 
 
             const t = uiText[currentLanguage];
-            if (currentHour >= 5 && currentHour < 12) {
-                timeOfDay = 'morning'; 
-                timeBasedHeadingText = t.morningHeading; 
-                greetingText = t.greetingMorning;
-                card.classList.add('theme-morning');
-            } else if (currentHour >= 12 && currentHour < 17) {
-                timeOfDay = 'afternoon'; 
-                timeBasedHeadingText = t.afternoonHeading; 
-                greetingText = t.greetingAfternoon;
-                card.classList.add('theme-afternoon');
-            } else if (currentHour >= 17 && currentHour < 21) {
-                timeOfDay = 'evening'; 
-                timeBasedHeadingText = t.eveningHeading; 
-                greetingText = t.greetingEvening;
-                card.classList.add('theme-evening');
-            } else {
-                timeOfDay = 'night'; 
-                timeBasedHeadingText = t.nightHeading; 
-                greetingText = t.greetingNight;
-                card.classList.add('theme-night');
-            }
+            if (currentHour >= 5 && currentHour < 12) { timeOfDay = 'morning'; } 
+            else if (currentHour >= 12 && currentHour < 17) { timeOfDay = 'afternoon'; }
+            else if (currentHour >= 17 && currentHour < 21) { timeOfDay = 'evening'; }
+            else { timeOfDay = 'night'; }
             
-            greetingDisplay.innerText = greetingText; // अभिवादन सेट करें
-            card.style.backgroundImage = `url('${backgroundImages[timeOfDay]}')`;
+            timeBasedHeadingText = t[timeOfDay + 'Heading'];
+            greetingText = t['greeting' + timeOfDay.charAt(0).toUpperCase() + timeOfDay.slice(1)];
+            
+            card.classList.add(`theme-${timeOfDay}`);
+            greetingDisplay.innerText = greetingText;
+            
+            // सेट बैकग्राउंड: कस्टम या डिफ़ॉल्ट
+            if (userInfo.backgroundDataUrl) {
+                card.style.backgroundImage = `url('${userInfo.backgroundDataUrl}')`;
+            } else {
+                card.style.backgroundImage = `url('${backgroundImages[timeOfDay]}')`;
+            }
 
             const quotesToShow = allQuotes[currentLanguage][timeOfDay];
             const quotesListDiv = document.getElementById('quotesList');
             document.getElementById('timeBasedHeading').innerText = timeBasedHeadingText;
             quotesListDiv.innerHTML = '';
-
             quotesToShow.forEach(quote => {
                 const item = document.createElement('div');
                 item.className = 'quote-item';
@@ -606,7 +611,6 @@
                 item.onclick = () => selectQuote(item);
                 quotesListDiv.appendChild(item);
             });
-
             document.getElementById('quotes-selection-section').style.display = 'block';
         }
         
@@ -631,29 +635,33 @@
             shareButton.textContent = uiText[currentLanguage].shareProcessing;
             shareButton.disabled = true;
 
+            let canvas;
             try {
-                const canvas = await html2canvas(captureElement, { useCORS: true, logging: false, scale: 3 });
-                canvas.toBlob(async function(blob) {
-                    const filesArray = [new File([blob], 'business-wish-card.png', { type: 'image/png' })];
-                    const shareData = {
-                        files: filesArray,
-                        text: `*${userInfo.name}*` + uiText[currentLanguage].shareMessage + uiText[currentLanguage].createYourOwnMessage,
-                        url: window.location.href
-                    };
-                    
-                    if (navigator.canShare && navigator.canShare(shareData)) {
-                        await navigator.share(shareData);
-                    } else {
-                        throw new Error("Web Share API not supported.");
-                    }
-                }, 'image/png');
+                canvas = await html2canvas(captureElement, { useCORS: true, logging: false, scale: 3 });
+                const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+                const filesArray = [new File([blob], 'business-wish-card.png', { type: 'image/png' })];
+                
+                const shareData = {
+                    files: filesArray,
+                    text: `*${userInfo.name}*` + uiText[currentLanguage].shareMessage + uiText[currentLanguage].createYourOwnMessage,
+                    url: window.location.href
+                };
+
+                if (navigator.canShare && navigator.canShare(shareData)) {
+                    await navigator.share(shareData);
+                } else {
+                    throw new Error("Web Share API not supported.");
+                }
             } catch (error) {
-                alert(uiText[currentLanguage].shareError);
-                const canvas = await html2canvas(captureElement, { scale: 3 });
-                const link = document.createElement('a');
-                link.download = 'business-wish-card.png';
-                link.href = canvas.toDataURL();
-                link.click();
+                if (error.name !== 'AbortError') {
+                    alert(uiText[currentLanguage].shareError);
+                    if (canvas) { 
+                        const link = document.createElement('a');
+                        link.download = 'business-wish-card.png';
+                        link.href = canvas.toDataURL();
+                        link.click();
+                    }
+                }
             } finally {
                 shareButton.textContent = originalText;
                 shareButton.disabled = false;
@@ -667,10 +675,8 @@
                 localStorage.setItem('theme', theme);
                 applyTheme(theme);
             });
-
             const savedTheme = localStorage.getItem('theme') || 'light';
             applyTheme(savedTheme);
-            
             setLanguage(currentLanguage);
         });
 
