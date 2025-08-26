@@ -291,8 +291,7 @@
         }
 
     </style>
-    <!-- विज्ञापन कोड 1 -->
-    <script type='text/javascript' src='//pl27270386.profitableratecpm.com/75/25/24/752524902fd57d63f18f963c43e2d393.js'></script>
+    <!-- विज्ञापन कोड 1: यहाँ से हटा दिया गया है -->
 </head>
 <body>
 
@@ -476,6 +475,17 @@
         let currentCropType = null; // 'photo' or 'background'
 
         // --- FUNCTIONS ---
+        
+        // नया बदलाव: विज्ञापन स्क्रिप्ट लोड करने का फंक्शन
+        function loadAdScript() {
+            if (document.getElementById('profit-ad-script')) return; // अगर स्क्रिप्ट पहले से है तो दोबारा न जोड़ें
+            const script = document.createElement('script');
+            script.id = 'profit-ad-script';
+            script.type = 'text/javascript';
+            script.src = '//pl27270386.profitableratecpm.com/75/25/24/752524902fd57d63f18f963c43e2d393.js';
+            document.body.appendChild(script);
+        }
+
         function setLanguage(lang) {
             currentLanguage = lang;
             document.documentElement.lang = lang;
@@ -571,6 +581,9 @@
                 userInfo.name = userName;
                 userInfo.contact = userContactInput.value;
                 userInfo.address = userAddressInput.value;
+                
+                // नया बदलाव: फॉर्म भरने के बाद विज्ञापन लोड करें
+                loadAdScript();
             }
             
             document.getElementById('input-section').style.display = 'none';
@@ -641,10 +654,11 @@
                 const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
                 const filesArray = [new File([blob], 'business-wish-card.png', { type: 'image/png' })];
                 
+                // नया बदलाव: शेयर डेटा को बेहतर बनाया गया
                 const shareData = {
                     files: filesArray,
-                    text: `*${userInfo.name}*` + uiText[currentLanguage].shareMessage + uiText[currentLanguage].createYourOwnMessage,
-                    url: window.location.href
+                    title: "Business Wish Card",
+                    text: `*${userInfo.name}*${uiText[currentLanguage].shareMessage}${uiText[currentLanguage].createYourOwnMessage}\n${window.location.href}`
                 };
 
                 if (navigator.canShare && navigator.canShare(shareData)) {
@@ -653,7 +667,7 @@
                     throw new Error("Web Share API not supported.");
                 }
             } catch (error) {
-                if (error.name !== 'AbortError') {
+                if (error.name !== 'AbortError') { // AbortError तब होता है जब यूज़र खुद शेयर डायलॉग बंद करता है
                     alert(uiText[currentLanguage].shareError);
                     if (canvas) { 
                         const link = document.createElement('a');
