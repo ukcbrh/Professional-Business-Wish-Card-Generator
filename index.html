@@ -170,26 +170,27 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            padding: 20px;
+            padding: 0;
         }
 
         .business-card::before {
             content: '';
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.5); 
+            background: rgba(0,0,0,0.25); 
             z-index: 1;
         }
         
-        .business-card.theme-morning::before { background: linear-gradient(135deg, rgba(246, 211, 101, 0.6), rgba(253, 160, 133, 0.6)); }
-        .business-card.theme-afternoon::before { background: linear-gradient(135deg, rgba(161, 196, 253, 0.6), rgba(194, 233, 251, 0.6)); }
-        .business-card.theme-evening::before { background: linear-gradient(135deg, rgba(255, 126, 95, 0.7), rgba(254, 180, 123, 0.7)); }
-        .business-card.theme-night::before { background: linear-gradient(135deg, rgba(44, 62, 80, 0.8), rgba(75, 108, 183, 0.8)); }
+        .business-card.theme-morning::before,
+        .business-card.theme-afternoon::before,
+        .business-card.theme-evening::before,
+        .business-card.theme-night::before {
+            background: rgba(0,0,0,0.25);
+        }
 
         .card-body, .card-footer {
             position: relative;
             z-index: 2;
-            text-shadow: 1px 1px 6px rgba(0,0,0,0.7);
         }
 
         .card-body {
@@ -198,7 +199,11 @@
             flex-direction: column; 
             align-items: center;
             justify-content: center;
-            padding: 10px 0;
+            padding: 20px 20px 10px 20px;
+        }
+        
+        #greetingDisplay, #quoteDisplay, #userNameDisplay, #userContactDisplay, #userAddressDisplay {
+             text-shadow: 0px 1px 10px rgba(0, 0, 0, 1), 0px 1px 5px rgba(0, 0, 0, 1);
         }
 
         #greetingDisplay {
@@ -219,13 +224,13 @@
             margin-top: 0;
         }
          #quoteDisplay::before, #quoteDisplay::after { display: none; }
-
+        
         .card-footer {
             display: flex;
             align-items: center;
             gap: 15px;
-            padding-top: 15px;
-            border-top: 1px solid rgba(255,255,255,0.4);
+            background-color: rgba(0, 0, 0, 0.6);
+            padding: 15px 20px;
         }
 
         #userImagePreview {
@@ -240,7 +245,19 @@
         .user-details { text-align: left; }
         #userNameDisplay { font-size: 1.5em; font-weight: 700; margin: 0; }
         #userContactDisplay, #userAddressDisplay { font-size: 0.9em; margin: 4px 0 0 0; opacity: 0.9; }
-        .share-button { background-color: #25D366; font-size: 1.1em; margin-top: 20px; }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+        .action-buttons button {
+            margin-top: 0;
+            flex-grow: 1; /* यह सुनिश्चित करेगा कि बटन उपलब्ध स्थान को बराबर साझा करें */
+        }
+        .share-button { background-color: #25D366; }
+        .download-button { background-color: var(--primary-color); }
         
         .modal {
             display: none;
@@ -274,24 +291,19 @@
             display: block;
         }
 
-        /* मोबाइल व्यू के लिए सुधार */
         @media (max-width: 420px) {
-            .business-card {
-                padding: 15px;
-            }
             #greetingDisplay { font-size: 1.7em; }
             #quoteDisplay { font-size: 1.4em; }
             #userImagePreview { width: 65px; height: 65px; }
             #userNameDisplay { font-size: 1.4em; }
             #userContactDisplay, #userAddressDisplay { 
                 font-size: 0.85em; 
-                word-break: break-all; /* लम्बे टेक्स्ट को टूटने में मदद करता है */
+                word-break: break-all;
             }
-            .card-footer { gap: 12px; }
+            .card-footer { gap: 12px; padding: 12px 15px; }
         }
 
     </style>
-    <!-- विज्ञापन कोड 1: यहाँ से हटा दिया गया है -->
 </head>
 <body>
 
@@ -311,7 +323,6 @@
             </div>
         </div>
         
-        <!-- चरण 1: उपयोगकर्ता जानकारी फॉर्म -->
         <div id="input-section">
             <h1 id="mainHeading">अपना कार्ड बनाए </h1>
             <div class="input-form">
@@ -322,7 +333,6 @@
                 <label for="userPhoto" id="photoLabel">🖼️ अपनी प्रोफाइल फोटो चुनें</label>
                 <input type="file" id="userPhoto" accept="image/*">
                 
-                <!-- नया: बैकग्राउंड चुनने का विकल्प -->
                 <label for="userBackground" id="backgroundLabel">🖼️ अपना बैकग्राउंड चुनें</label>
                 <input type="file" id="userBackground" accept="image/*">
 
@@ -330,13 +340,11 @@
             </div>
         </div>
 
-        <!-- चरण 2: कोटेशन चुनने का सेक्शन -->
         <div id="quotes-selection-section" style="display:none;">
             <h2 id="timeBasedHeading">एक कोटेशन चुनें:</h2>
             <div class="quote-list" id="quotesList"></div>
         </div>
 
-        <!-- चरण 3 & 4: प्रीव्यू और शेयरिंग सेक्शन -->
         <div id="wishSection" style="display:none;">
 
             <div class="business-card" id="captureArea">
@@ -353,12 +361,15 @@
                     </div>
                 </div>
             </div>
-            <button class="share-button" id="shareBtn" onclick="shareWish(event)">📤 शेयर करें</button>
+            
+            <div class="action-buttons">
+                <button class="share-button" id="shareBtn" onclick="shareWish(event)">📤 शेयर करें</button>
+                <button class="download-button" id="downloadBtn" onclick="downloadWish()">📥 डाउनलोड करें</button>
+            </div>
             
         </div>
     </div>
 
-    <!-- फोटो क्रॉप करने के लिए Modal HTML -->
     <div id="cropModal" class="modal">
         <div class="modal-content">
             <h2 id="cropModalTitle">अपनी फोटो सेट करें</h2>
@@ -395,6 +406,9 @@
                 greetingNight: "शुभ रात्रि",
                 shareBtn: "📤 शेयर करें",
                 shareProcessing: "प्रोसेसिंग...",
+                downloadBtn: "📥 डाउनलोड करें",
+                downloadProcessing: "डाउनलोड हो रहा है...",
+                downloadError: "डाउनलोड तैयार करने में त्रुटि हुई।",
                 shareMessage: " की ओर से एक प्यारा संदेश! ✨",
                 createYourOwnMessage: "\n\nआप भी ऐसे ही अपना बिजनेस कार्ड बना सकते हैं और अपने मित्रों को भेज सकते हैं। यहाँ बनाएँ:",
                 alertMessage: "कृपया अपना नाम और प्रोफाइल फोटो ज़रूर चुनें!",
@@ -425,6 +439,9 @@
                 greetingNight: "Good Night",
                 shareBtn: "📤 Share",
                 shareProcessing: "Processing...",
+                downloadBtn: "📥 Download",
+                downloadProcessing: "Downloading...",
+                downloadError: "Error preparing download.",
                 shareMessage: " has sent a lovely message! ✨",
                 createYourOwnMessage: "\n\nYou can create your own business card and send it to your friends too. Create one here:",
                 alertMessage: "Please enter your name and select a profile photo!",
@@ -461,6 +478,7 @@
         const backgroundLabel = document.getElementById('backgroundLabel');
         const showQuotesBtn = document.getElementById('showQuotesBtn');
         const shareBtn = document.getElementById('shareBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
         const darkModeToggle = document.getElementById('darkModeToggle');
         
         const cropModal = document.getElementById('cropModal');
@@ -472,20 +490,9 @@
 
         let userInfo = {};
         let cropper = null;
-        let currentCropType = null; // 'photo' or 'background'
+        let currentCropType = null;
 
         // --- FUNCTIONS ---
-        
-        // नया बदलाव: विज्ञापन स्क्रिप्ट लोड करने का फंक्शन
-        function loadAdScript() {
-            if (document.getElementById('profit-ad-script')) return; // अगर स्क्रिप्ट पहले से है तो दोबारा न जोड़ें
-            const script = document.createElement('script');
-            script.id = 'profit-ad-script';
-            script.type = 'text/javascript';
-            script.src = '//pl27270386.profitableratecpm.com/75/25/24/752524902fd57d63f18f963c43e2d393.js';
-            document.body.appendChild(script);
-        }
-
         function setLanguage(lang) {
             currentLanguage = lang;
             document.documentElement.lang = lang;
@@ -501,6 +508,7 @@
             backgroundLabel.textContent = userInfo.backgroundDataUrl ? t.backgroundLabelSelected : t.backgroundLabelDefault;
             showQuotesBtn.textContent = t.showQuotesBtn;
             shareBtn.textContent = t.shareBtn;
+            downloadBtn.textContent = t.downloadBtn;
             cropConfirmBtn.textContent = t.cropConfirmBtn;
 
             document.getElementById('lang-hi').classList.toggle('active', lang === 'hi');
@@ -532,8 +540,8 @@
                     if (cropType === 'photo') {
                         cropperOptions.aspectRatio = 1;
                         cropModalTitle.textContent = uiText[currentLanguage].cropModalTitlePhoto;
-                    } else { // background
-                        cropperOptions.aspectRatio = 500 / 350; // Card's approximate aspect ratio
+                    } else { 
+                        cropperOptions.aspectRatio = 500 / 350;
                         cropModalTitle.textContent = uiText[currentLanguage].cropModalTitleBackground;
                     }
 
@@ -581,9 +589,6 @@
                 userInfo.name = userName;
                 userInfo.contact = userContactInput.value;
                 userInfo.address = userAddressInput.value;
-                
-                // नया बदलाव: फॉर्म भरने के बाद विज्ञापन लोड करें
-                loadAdScript();
             }
             
             document.getElementById('input-section').style.display = 'none';
@@ -606,7 +611,6 @@
             card.classList.add(`theme-${timeOfDay}`);
             greetingDisplay.innerText = greetingText;
             
-            // सेट बैकग्राउंड: कस्टम या डिफ़ॉल्ट
             if (userInfo.backgroundDataUrl) {
                 card.style.backgroundImage = `url('${userInfo.backgroundDataUrl}')`;
             } else {
@@ -651,34 +655,55 @@
             let canvas;
             try {
                 canvas = await html2canvas(captureElement, { useCORS: true, logging: false, scale: 3 });
-                const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
-                const filesArray = [new File([blob], 'business-wish-card.png', { type: 'image/png' })];
                 
-                // नया बदलाव: शेयर डेटा को बेहतर बनाया गया
-                const shareData = {
-                    files: filesArray,
-                    title: "Business Wish Card",
-                    text: `*${userInfo.name}*${uiText[currentLanguage].shareMessage}${uiText[currentLanguage].createYourOwnMessage}\n${window.location.href}`
-                };
-
-                if (navigator.canShare && navigator.canShare(shareData)) {
-                    await navigator.share(shareData);
+                if (window.AndroidBridge && typeof window.AndroidBridge.shareImage === 'function') {
+                    const base64Image = canvas.toDataURL('image/png');
+                    const shareMessage = `*${userInfo.name}*` + uiText[currentLanguage].shareMessage + uiText[currentLanguage].createYourOwnMessage + "\n" + window.location.href;
+                    window.AndroidBridge.shareImage(base64Image, shareMessage);
                 } else {
-                    throw new Error("Web Share API not supported.");
+                    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+                    const filesArray = [new File([blob], 'business-wish-card.png', { type: 'image/png' })];
+                    
+                    const shareData = {
+                        files: filesArray,
+                        text: `*${userInfo.name}*` + uiText[currentLanguage].shareMessage + uiText[currentLanguage].createYourOwnMessage,
+                        url: window.location.href
+                    };
+
+                    if (navigator.canShare && navigator.canShare(shareData)) {
+                        await navigator.share(shareData);
+                    } else {
+                        throw new Error("Web Share API not supported.");
+                    }
                 }
             } catch (error) {
-                if (error.name !== 'AbortError') { // AbortError तब होता है जब यूज़र खुद शेयर डायलॉग बंद करता है
+                if (error.name !== 'AbortError') {
                     alert(uiText[currentLanguage].shareError);
-                    if (canvas) { 
-                        const link = document.createElement('a');
-                        link.download = 'business-wish-card.png';
-                        link.href = canvas.toDataURL();
-                        link.click();
-                    }
                 }
             } finally {
                 shareButton.textContent = originalText;
                 shareButton.disabled = false;
+            }
+        }
+        
+        async function downloadWish() {
+            const captureElement = document.getElementById('captureArea');
+            const downloadButton = document.getElementById('downloadBtn');
+            const originalText = downloadButton.textContent;
+            downloadButton.textContent = uiText[currentLanguage].downloadProcessing;
+            downloadButton.disabled = true;
+
+            try {
+                const canvas = await html2canvas(captureElement, { useCORS: true, logging: false, scale: 3 });
+                const link = document.createElement('a');
+                link.download = 'business-wish-card.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            } catch (error) {
+                alert(uiText[currentLanguage].downloadError);
+            } finally {
+                downloadButton.textContent = originalText;
+                downloadButton.disabled = false;
             }
         }
         
